@@ -334,7 +334,7 @@ void level::initialize(ezRectFloat levelBounds)
 
   g_ship.transform.position = ezVec2::ZeroVector();
   g_ship.transform.rotation = ezAngle();
-  g_ship.boundingRadius = 0.45f * shipTex->getWidth();
+  g_ship.boundingRadius = 0.3f * shipTex->getWidth();
 
   // Life
   // ====
