@@ -1,0 +1,38 @@
+- Debugger Visualizations (Natvis files)
+- Startup
+  - Startup class with virtual functions for different tasks (core startup, window creation, ...).
+  - ezBitflags<DefaultLoggingSystem> to manage which default logging systems will be initialized.
+  - Time smoother thingy.
+  - Update registry with priorities?
+    - struct UpdateCallback { ezString name; ezEvent<...> callback; ezInt32 prio; };
+  - Option for async rendering (even if it is not implemented yet)?
+- Game as ezPlugin
+  - krGame?
+- Resource manager.
+- Random Number Generation
+  - `randomColor()`, `randomPos(ezRectangleFloat)`, `randomDir(???)`.
+- (Very, very) thin physics abstraction?
+  - Not necessary for voidSpaces!
+  - Except maybe for basic collision detection (circle-circle, aabb-aabb, circle-aabb).
+- Timed events.
+  - struct TimedEvent<DATA> { ezEvent<DATA> event; ezTime triggerTime; DATA data; /* ??? */ };
+- Math
+  - Move vector/Transform2D
+  - Rotate vector/Transfrom2D
+  - Either provide functions for ezRect<abc> or implement own rectangle (with conversion to ezRect<abc>)
+    - Need `getLeft()`, `getCenter()`, etc., `getCenterAligned()`, `getLeftAligned()`, etc.
+- Input
+  - `registerInputAction(...)`
+  - Replace ezInputSlot_KeySpace => Keyboard("Space") or keyboard.space
+- State Machine
+  - Probably overkill for asteroids.
+- Sprite
+  - Update automatically when needed (`sprite.needsUpdate()`)
+  - Init and update as member functions.
+- Sprite animations!
+  - Different tracks (sprite track, transform track, ...)
+  - struct SpriteAnimation { struct Frame{ ezTime duration; SomeKindOfTrackArray tracks; }; ezDynamicArray<Frame> frames; };
+- Particles!
+- Sound.
+- Font rendering...
+- Command Line Utils?
