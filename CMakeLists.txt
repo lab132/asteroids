@@ -26,9 +26,8 @@ include(targets/krepel)
 set(ASTEROIDS_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH "Root directory of asteroids.")
 mark_as_advanced(ASTEROIDS_DIR)
 
-
-include(kr_client_copy_dlls)
-kr_client_copy_dlls("${ASTEROIDS_DIR}/bin")
-
 include_directories("code")
 add_subdirectory("code")
+
+include(kr_create_target_pullRuntimeBinaries)
+kr_create_target_pullRuntimeBinaries("${ASTEROIDS_DIR}/bin" "${KREPEL_DIR}/bin/")

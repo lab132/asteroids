@@ -83,7 +83,8 @@ struct Cam
                             0.1f,                            // Near plane.
                             1.0f);                           // Far plane.
     this->cam.LookAt(ezVec3(0, 0, 0.5f), // Camera Position.
-                     ezVec3(0, 0, 0));   // Target Position.
+                     ezVec3(0, 0, 0),    // Target Position.
+                     ezVec3(0, 0, 1));   // Up Vector.
 
     kr::Renderer::addExtractionListener(kr::Renderer::ExtractionEventListener(&Cam::extract, this));
   }
@@ -112,6 +113,7 @@ kr::Owned<kr::Window> createAsteroidsWindow()
   return kr::Window::createAndOpen(desc);
 }
 
+/*
 int main(int argc, char* argv[])
 {
   {
@@ -184,3 +186,57 @@ int main(int argc, char* argv[])
 
   return 0;
 }
+*/
+
+#include <krEngine/game.h>
+
+class AsteroidsModule : public kr::DefaultMainModule
+{
+public:
+  kr::GameLoop m_loop;
+  ezTime m_elapsedTime;
+
+  AsteroidsModule()
+  {
+    m_windowDesc.m_Title = "Asteroids";
+
+    EZ_VERIFY(ezFileSystem::AddDataDirectory(kr::makePath(kr::defaultRoot(), "data", "textures"), ezFileSystem::ReadOnly, "", "texture").Succeeded(),
+              "Failed to mount textures directory.");
+
+    EZ_VERIFY(ezFileSystem::AddDataDirectory(kr::makePath(kr::defaultRoot(), "data", "shaders"), ezFileSystem::ReadOnly, "", "shader").Succeeded(),
+              "Failed to mount shaders directory.");
+  }
+
+  void OnEngineStartup()
+  {
+    kr::DefaultMainModule::OnEngineStartup();
+
+    m_loop.addCallback("main", { &AsteroidsModule::tick, this });
+    kr::GlobalGameLoopRegistry::add("asteroids", &m_loop);
+
+    ezRectFloat levelBounds{
+      0,
+      0,
+      static_cast<float>(m_pWindow->getClientAreaSize().width),
+      static_cast<float>(m_pWindow->getClientAreaSize().height)
+    };
+
+    level::initialize(kr::move(levelBounds));
+  }
+
+  void OnEngineShutdown()
+  {
+    level::shutdown();
+    kr::GlobalGameLoopRegistry::remove("asteroids");
+  }
+
+  void tick()
+  {
+    auto dt{ ezTime::Now() - m_elapsedTime };
+    m_elapsedTime += dt;
+
+
+  }
+
+} static g_mainModule; // <-- A static instance is mandatory!
+
