@@ -242,7 +242,7 @@ public:
     level::update(gameLoopData);
     if (gameLoopData.stop)
     {
-      kr::GlobalGameLoopRegistry::setKeepTicking(false);
+      kr::GlobalGameLoop::setKeepTicking(false);
     }
   }
 
