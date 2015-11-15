@@ -82,16 +82,16 @@ struct Cam
                             static_cast<float>(size.width),  // Width of the orthographic cam.
                             0.1f,                            // Near plane.
                             1.0f);                           // Far plane.
-    this->cam.LookAt(ezVec3(0, 0, 0.5f), // Camera Position.
+    this->cam.LookAt(ezVec3(0, 0, -0.5f), // Camera Position.
                      ezVec3(0, 0, 0),    // Target Position.
-                     ezVec3(0, 0, 1));   // Up Vector.
+                     ezVec3(0, 1, 0));   // Up Vector.
 
-    kr::Renderer::addExtractionListener(kr::Renderer::ExtractionEventListener(&Cam::extract, this));
+    kr::Renderer::addExtractionListener({ &Cam::extract, this });
   }
 
   ~Cam()
   {
-    kr::Renderer::removeExtractionListener(kr::Renderer::ExtractionEventListener(&Cam::extract, this));
+    kr::Renderer::removeExtractionListener({ &Cam::extract, this });
   }
 
   void extract(kr::Renderer::Extractor& e)
@@ -193,12 +193,13 @@ int main(int argc, char* argv[])
 class AsteroidsModule : public kr::DefaultMainModule
 {
 public:
-  kr::GameLoop m_loop;
-  ezTime m_elapsedTime;
+  Cam* m_pCam;
 
   AsteroidsModule()
   {
-    m_windowDesc.m_Title = "Asteroids";
+    m_windowDesc.m_ClientAreaSize.width = 512;
+    m_windowDesc.m_ClientAreaSize.height = 512;
+    m_windowDesc.m_Title = "Asteroids - Powered by Krepel";
 
     EZ_VERIFY(ezFileSystem::AddDataDirectory(kr::makePath(kr::defaultRoot(), "data", "textures"), ezFileSystem::ReadOnly, "", "texture").Succeeded(),
               "Failed to mount textures directory.");
@@ -207,12 +208,11 @@ public:
               "Failed to mount shaders directory.");
   }
 
-  void OnEngineStartup()
+  virtual void OnEngineStartup() override
   {
     kr::DefaultMainModule::OnEngineStartup();
 
-    m_loop.addCallback("main", { &AsteroidsModule::tick, this });
-    kr::GlobalGameLoopRegistry::add("asteroids", &m_loop);
+    m_pCam = EZ_DEFAULT_NEW(Cam, window());
 
     ezRectFloat levelBounds{
       0,
@@ -220,22 +220,30 @@ public:
       static_cast<float>(m_pWindow->getClientAreaSize().width),
       static_cast<float>(m_pWindow->getClientAreaSize().height)
     };
+    levelBounds.x = -0.5f * levelBounds.width;
+    levelBounds.y = -0.5f * levelBounds.height;
 
     level::initialize(kr::move(levelBounds));
   }
 
-  void OnEngineShutdown()
+  virtual void OnEngineShutdown() override
   {
     level::shutdown();
-    kr::GlobalGameLoopRegistry::remove("asteroids");
+
+    EZ_DEFAULT_DELETE(m_pCam);
+
+    kr::DefaultMainModule::OnEngineShutdown();
   }
 
-  void tick()
+  virtual void tick() override
   {
-    auto dt{ ezTime::Now() - m_elapsedTime };
-    m_elapsedTime += dt;
-
-
+    GameLoopData gameLoopData;
+    gameLoopData.dt = clock()->GetTimeDiff();
+    level::update(gameLoopData);
+    if (gameLoopData.stop)
+    {
+      kr::GlobalGameLoopRegistry::setKeepTicking(false);
+    }
   }
 
 } static g_mainModule; // <-- A static instance is mandatory!
